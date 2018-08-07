@@ -3,16 +3,15 @@ import numpy as np
 from random import randint
 
 n_epochs = 500
+batch_size = 100
 
 def preprocess(boston_data, percentage):
     x = boston_data.data
-    print(x.shape)
     y = boston_data.target
     n_data = x.shape[0]
     n_training = int(percentage * n_data)
     x_train = np.empty(shape=(n_training, 13))
     y_train = np.empty(shape=(n_training, 1))
-    print(x_train.shape)
     for i in range(n_training):
         index = randint(0, n_data - 1)
         x_train[i] = x[index]
@@ -32,11 +31,22 @@ def init_weights_and_bias(training_size):
 
 def mean_square_error(predicted, actual):
     sum = 0
-    print(prediction.size)
     for i in range(predicted.size):
-        error = np.square(actual[i] - predicted[i])
+        error = (actual[i] - predicted[i]) ** 2
         sum += error
     return sum
+
+
+def get_batch(inputs, outputs):
+    batch_data = np.empty(shape=(batch_size, 13))
+    batch_outputs = np.empty(shape=(batch_size, 1))
+    for i in range(batch_size):
+        index = randint(0, inputs.shape[0] - 1)
+        batch_data[i] = inputs[index]
+        batch_outputs[i] = outputs[index]
+        np.delete(inputs, index, axis=0)
+        np.delete(outputs, index, axis=0)
+    return batch_data, batch_outputs
 
 
 if __name__ == '__main__':
@@ -45,6 +55,7 @@ if __name__ == '__main__':
     x_train, x_test, y_train, y_test, n_training = preprocess(boston, 0.67)
     weights, bias = init_weights_and_bias(n_training)
     for i in range(n_epochs):
-        prediction = np.matmul(x_train, weights) + bias
-        sum = mean_square_error(prediction, y_train)
-        
+        batch_inputs, batch_outputs = get_batch(x_train, y_train)
+        prediction = np.matmul(batch_inputs, weights) + bias
+        error = mean_square_error(prediction, batch_outputs)
+
