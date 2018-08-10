@@ -4,6 +4,7 @@ from random import randint
 
 n_epochs = 500
 batch_size = 100
+learning_rate = 0.00001
 
 def preprocess(boston_data, percentage):
     x = boston_data.data
@@ -29,13 +30,22 @@ def init_weights_and_bias(training_size):
     return weights, bias
 
 
-def mean_square_error(predicted, actual):
-    sum = 0
-    for i in range(predicted.size):
-        error = (actual[i] - predicted[i]) ** 2
-        sum += error
-    return sum
+def mean_square_error_prime(prediction, actual, input):
+    diff = prediction - actual
+    return diff * input
 
+
+def mean_square_error(predicted, actual):
+    error = sum(data ** 2 for data in (actual - predicted))/predicted.shape[0]
+    print(error)
+    return error
+
+
+def get_gradients(inputs, predictions, actuals, weights):
+    weights_gradient = -(2/float(inputs.shape[0])) * sum((actuals - predictions) * inputs)
+    weights_gradient = weights_gradient.reshape((13, 1))
+    weights = weights - (learning_rate * weights_gradient)
+    return weights
 
 def get_batch(inputs, outputs):
     batch_data = np.empty(shape=(batch_size, 13))
@@ -49,6 +59,8 @@ def get_batch(inputs, outputs):
     return batch_data, batch_outputs
 
 
+
+
 if __name__ == '__main__':
     boston = load_boston()
     test = boston.keys()
@@ -58,4 +70,7 @@ if __name__ == '__main__':
         batch_inputs, batch_outputs = get_batch(x_train, y_train)
         prediction = np.matmul(batch_inputs, weights) + bias
         error = mean_square_error(prediction, batch_outputs)
+        weights = get_gradients(batch_inputs, prediction, batch_outputs, weights)
+        if i % 100 == 0:
+            print('current error: {}'.format(error))
 
