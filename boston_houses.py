@@ -8,11 +8,11 @@ batch_size = 100
 learning_rate = 0.000002
 
 
-def preprocess(boston_data, percentage):
+def preprocess(boston_data, split_ratio):
     x = boston_data.data
     y = boston_data.target
     n_data = x.shape[0]
-    n_training = int(percentage * n_data)
+    n_training = int(split_ratio * n_data)
     x_train = np.empty(shape=(n_training, 13))
     y_train = np.empty(shape=(n_training, 1))
     for i in range(n_training):
@@ -42,11 +42,13 @@ def mean_square_error(predicted, actual):
     return error
 
 
-def get_gradients(inputs, predictions, actuals, weights):
+def get_gradients(inputs, predictions, actuals, weights, bias):
     weights_gradient = -(2/float(inputs.shape[0])) * sum((actuals - predictions) * inputs)
     weights_gradient = weights_gradient.reshape((13, 1))
+    bias_gradient = -2/(float(inputs.shape[0])) * sum(actuals - predictions)
     weights -= learning_rate * weights_gradient
-    return weights
+    bias -= learning_rate * bias_gradient
+    return weights, bias
 
 
 def get_batch(inputs, outputs):
@@ -72,13 +74,12 @@ if __name__ == '__main__':
         batch_inputs, batch_outputs = get_batch(x_train, y_train)
         prediction = np.matmul(batch_inputs, weights) + bias
         error = mean_square_error(prediction, batch_outputs)
-        weights = get_gradients(batch_inputs, prediction, batch_outputs, weights)
+        weights, bias = get_gradients(batch_inputs, prediction, batch_outputs, weights, bias)
         if i % 100 == 0:
             print('current error: {}'.format(error))
 
     for i in range(n_testing):
         actual = y_test[i]
         predicted = np.matmul(x_test[i], weights) + bias
-        if i % 10 == 0:
-            print('actual: {0}, predicted: {1}'.format(actual, predicted[0]))
+        print('actual: {0}, predicted: {1}'.format(actual, predicted[0]))
 
