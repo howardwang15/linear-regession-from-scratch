@@ -23,7 +23,7 @@ def preprocess(boston_data, percentage):
         x = np.delete(x, index, axis=0)
         y = np.delete(y, index, axis=0)
         n_data -= 1
-    return x_train, x, y_train, y, n_training
+    return x_train, x, y_train, y
 
 
 def init_weights_and_bias(training_size):
@@ -64,7 +64,9 @@ def get_batch(inputs, outputs):
 if __name__ == '__main__':
     boston = load_boston()
     test = boston.keys()
-    x_train, x_test, y_train, y_test, n_training = preprocess(boston, 0.67)
+    x_train, x_test, y_train, y_test = preprocess(boston, 0.67)
+    n_training = x_train.shape[0]
+    n_testing = x_test.shape[0]
     weights, bias = init_weights_and_bias(n_training)
     for i in range(n_epochs):
         batch_inputs, batch_outputs = get_batch(x_train, y_train)
@@ -73,4 +75,10 @@ if __name__ == '__main__':
         weights = get_gradients(batch_inputs, prediction, batch_outputs, weights)
         if i % 100 == 0:
             print('current error: {}'.format(error))
+
+    for i in range(n_testing):
+        actual = y_test[i]
+        predicted = np.matmul(x_test[i], weights) + bias
+        if i % 10 == 0:
+            print('actual: {0}, predicted: {1}'.format(actual, predicted[0]))
 
