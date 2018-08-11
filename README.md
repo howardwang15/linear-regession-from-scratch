@@ -1,0 +1,2 @@
+This project is a walkthrough of a linear regression machine learning model that I constructed from scratch. For this project, I used python and the numpy module for all matrix/vector operations, such as preprocessing (splitting data into training and testing), training, gradient descent, and testing.
+I used the sklearn boston housing dataset (http://scikit-learn.org/stable/modules/generated/sklearn.datasets.load_boston.html) for this model. 
