@@ -2,9 +2,11 @@ from sklearn.datasets import load_boston
 import numpy as np
 from random import randint
 
-n_epochs = 500
+
+n_epochs = 7000
 batch_size = 100
-learning_rate = 0.00001
+learning_rate = 0.000002
+
 
 def preprocess(boston_data, percentage):
     x = boston_data.data
@@ -37,15 +39,15 @@ def mean_square_error_prime(prediction, actual, input):
 
 def mean_square_error(predicted, actual):
     error = sum(data ** 2 for data in (actual - predicted))/predicted.shape[0]
-    print(error)
     return error
 
 
 def get_gradients(inputs, predictions, actuals, weights):
     weights_gradient = -(2/float(inputs.shape[0])) * sum((actuals - predictions) * inputs)
     weights_gradient = weights_gradient.reshape((13, 1))
-    weights = weights - (learning_rate * weights_gradient)
+    weights -= learning_rate * weights_gradient
     return weights
+
 
 def get_batch(inputs, outputs):
     batch_data = np.empty(shape=(batch_size, 13))
@@ -57,8 +59,6 @@ def get_batch(inputs, outputs):
         np.delete(inputs, index, axis=0)
         np.delete(outputs, index, axis=0)
     return batch_data, batch_outputs
-
-
 
 
 if __name__ == '__main__':
